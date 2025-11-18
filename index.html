@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Mental Health & Performance Dashboard</title>
+
+  <style>
+    :root {
+      --bg-main: #050712;
+      --bg-card: #101223;
+      --bg-card-alt: #15182a;
+      --border-subtle: #262a3f;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-gold: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, var(--bg-main) 45%, #020617 100%);
+      color: var(--text-main);
+    }
+
+    header {
+      padding: 16px 32px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: linear-gradient(
+        120deg,
+        rgba(34,197,94,0.18),
+        rgba(15,23,42,0.9),
+        rgba(239,68,68,0.18)
+      );
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header h1 span.badge {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.2);
+      background: rgba(15,23,42,0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    header p span.holiday {
+      color: var(--accent-gold);
+    }
+
+    main {
+      padding: 16px 32px 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Top navigation for views */
+    #viz-nav {
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    #viz-nav button {
+      background: rgba(15,23,42,0.95);
+      color: var(--text-main);
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      padding: 7px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+    #viz-nav button .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+    }
+
+    #btn-mental .dot {
+      background: var(--accent-green);
+    }
+
+    #btn-performance .dot {
+      background: var(--accent-gold);
+    }
+
+    #btn-insights .dot {
+      background: var(--accent-red);
+    }
+
+    #viz-nav button.active {
+      background: linear-gradient(135deg, rgba(34,197,94,0.6), rgba(248,250,252,0.04));
+      border-color: rgba(74,222,128,0.8);
+      transform: translateY(-1px);
+    }
+
+    #viz-nav button:hover:not(.active) {
+      border-color: rgba(148,163,184,0.9);
+    }
+
+    /* Cards / viz containers */
+    .viz {
+      display: none;
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.05), transparent 45%),
+                  radial-gradient(circle at bottom right, rgba(248, 250, 252, 0.04), transparent 50%),
+                  var(--bg-card);
+      border-radius: 16px;
+      padding: 16px 18px 24px;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.9);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+    }
+
+    .viz.active {
+      display: block;
+    }
+
+    .viz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .viz-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .viz-header span.sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .controls {
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .controls label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    select {
+      background: var(--bg-card-alt);
+      color: var(--text-main);
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      padding: 3px 10px;
+      font-size: 13px;
+    }
+
+    svg {
+      width: 100%;
+      height: 430px;
+    }
+
+    .small-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .pill {
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      color: var(--text-muted);
+      background: rgba(15,23,42,0.7);
+    }
+
+    .pill span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-gold);
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(15,23,42,0.98);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #f9fafb;
+      border: 1px solid rgba(148,163,184,0.6);
+      display: none;
+      max-width: 260px;
+      line-height: 1.4;
+      box-shadow: 0 12px 30px rgba(15,23,42,0.95);
+    }
+
+    /* Insights card */
+    .insights-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 8px 0 0;
+      font-size: 13px;
+    }
+
+    .insights-list li {
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .insights-list li::before {
+      content: "•";
+      color: var(--accent-green);
+      margin-right: 6px;
+    }
+
+    @media (max-width: 768px) {
+      header, main {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>
+      Student Mental Health & Performance
+      <span class="badge">
+        <span style="color: var(--accent-green);">●</span>
+        Online
+      </span>
+    </h1>
+    <p>
+      Exploring how <span class="holiday">well-being</span> and <span class="holiday">academic success</span> interact for students, using two real-world datasets.
+    </p>
+  </header>
+
+  <main>
+    <!-- Top nav tabs -->
+    <div id="viz-nav">
+      <button id="btn-mental" class="active" data-target="viz-mental">
+        <span class="dot"></span>
+        Mental Health
+      </button>
+      <button id="btn-performance" data-target="viz-performance">
+        <span class="dot"></span>
+        Academic Performance
+      </button>
+      <button id="btn-insights" data-target="viz-insights">
+        <span class="dot"></span>
+        Overview & Insights
+      </button>
+    </div>
+
+    <!-- Mental Health Section -->
+    <section id="viz-mental" class="viz active">
+      <div class="viz-header">
+        <h2>Mental Health Snapshot</h2>
+        <span class="sub">
+          Based on <span id="mh-count">–</span> students from the mental health survey
+        </span>
+      </div>
+
+      <div class="controls">
+        <label>
+          Gender:
+          <select id="mh-gender-filter">
+            <option value="All">All</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </label>
+
+        <label>
+          Condition:
+          <select id="mh-condition-select">
+            <option value="depression">Depression</option>
+            <option value="anxiety">Anxiety</option>
+          </select>
+        </label>
+
+        <span class="pill">
+          <span class="dot"></span>
+          Uses mental_health_clean.csv
+        </span>
+      </div>
+
+      <!-- Placeholder SVG for a future chart (e.g., bar/line/heatmap) -->
+      <svg id="mh-svg"></svg>
+
+      <div class="small-note">
+        Tip: You can use this space for a bar chart of condition rates by CGPA, major, or university.
+      </div>
+    </section>
+
+    <!-- Academic Performance Section -->
+    <section id="viz-performance" class="viz">
+      <div class="viz-header">
+        <h2>Academic Performance Snapshot</h2>
+        <span class="sub">
+          Based on <span id="sp-count">–</span> students from the performance dataset
+        </span>
+      </div>
+
+      <div class="controls">
+        <label>
+          Test Prep:
+          <select id="sp-prep-filter">
+            <option value="All">All</option>
+            <option value="yes">Completed</option>
+            <option value="no">No prep</option>
+          </select>
+        </label>
+
+        <label>
+          Score to focus:
+          <select id="sp-score-select">
+            <option value="math_score">Math</option>
+            <option value="reading_score">Reading</option>
+            <option value="writing_score">Writing</option>
+          </select>
+        </label>
+
+        <span class="pill">
+          <span class="dot"></span>
+          Uses student_performance_clean.csv
+        </span>
+      </div>
+
+      <!-- Placeholder SVG for a future chart (e.g., distribution or scatter) -->
+      <svg id="sp-svg"></svg>
+
+      <div class="small-note">
+        Tip: A histogram or boxplot per score, split by test prep, works really well here.
+      </div>
+    </section>
+
+    <!-- Insights / Overview Section -->
+    <section id="viz-insights" class="viz">
+      <div class="viz-header">
+        <h2>Project Overview & Planned Insights</h2>
+        <span class="sub">High-level story tying both datasets together</span>
+      </div>
+
+      <p class="small-note">
+        This section is for final presentation & report: briefly explain questions, data sources, and what each visualization reveals.
+      </p>
+
+      <ul class="insights-list">
+        <li>Mental health dataset: self-reported depression/anxiety plus CGPA, university, academic workload, and lifestyle factors.</li>
+        <li>Performance dataset: standardized math, reading, writing scores with demographic and support context like test prep and lunch type.</li>
+        <li>Dashboard design: one tab focusing on mental health patterns, one on score distributions, and one on synthesizing takeaways.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
