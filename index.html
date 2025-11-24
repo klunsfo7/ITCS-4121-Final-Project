@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Student Mental Health & Performance Dashboard</title>
-
+  <title>Student Mental Health & Academic Performance – D3 Dashboard</title>
   <style>
     :root {
       --bg-main: #050712;
@@ -15,6 +14,7 @@
       --accent-green: #22c55e;
       --accent-red: #ef4444;
       --accent-gold: #fbbf24;
+      --accent-blue: #38bdf8;
     }
 
     * {
@@ -25,23 +25,23 @@
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #111827 0, var(--bg-main) 45%, #020617 100%);
+      background: radial-gradient(circle at top, #3f6ac7 0, var(--bg-main) 100%, #6481ff 100%);
       color: var(--text-main);
     }
 
     header {
-      padding: 16px 32px 14px;
+      padding: 18px 32px 18px;
       border-bottom: 1px solid var(--border-subtle);
       background: linear-gradient(
         120deg,
-        rgba(34,197,94,0.18),
-        rgba(15,23,42,0.9),
-        rgba(239,68,68,0.18)
+        rgba(34,197,94,0.2),
+        rgba(15,23,42,0.95),
+        rgba(239,68,68,0.25)
       );
       position: sticky;
       top: 0;
       z-index: 10;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
     }
 
     header h1 {
@@ -71,134 +71,59 @@
       font-size: 14px;
     }
 
-    header p span.holiday {
-      color: var(--accent-gold);
-    }
-
     main {
-      padding: 16px 32px 32px;
+      padding: 20px 32px 40px;
       max-width: 1200px;
       margin: 0 auto;
     }
 
-    /* Top navigation for views */
-    #viz-nav {
-      margin-bottom: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    #viz-nav button {
-      background: rgba(15,23,42,0.95);
-      color: var(--text-main);
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      padding: 7px 14px;
-      cursor: pointer;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-    }
-
-    #viz-nav button .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-    }
-
-    #btn-mental .dot {
-      background: var(--accent-green);
-    }
-
-    #btn-performance .dot {
-      background: var(--accent-gold);
-    }
-
-    #btn-insights .dot {
-      background: var(--accent-red);
-    }
-
-    #viz-nav button.active {
-      background: linear-gradient(135deg, rgba(34,197,94,0.6), rgba(248,250,252,0.04));
-      border-color: rgba(74,222,128,0.8);
-      transform: translateY(-1px);
-    }
-
-    #viz-nav button:hover:not(.active) {
-      border-color: rgba(148,163,184,0.9);
-    }
-
-    /* Cards / viz containers */
-    .viz {
-      display: none;
+    .section {
+      margin-bottom: 26px;
       background: radial-gradient(circle at top left, rgba(34,197,94,0.05), transparent 45%),
                   radial-gradient(circle at bottom right, rgba(248, 250, 252, 0.04), transparent 50%),
                   var(--bg-card);
       border-radius: 16px;
-      padding: 16px 18px 24px;
-      box-shadow: 0 18px 40px rgba(15,23,42,0.9);
+      padding: 18px 20px 24px;
       border: 1px solid var(--border-subtle);
-      margin-bottom: 18px;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.9);
     }
 
-    .viz.active {
-      display: block;
-    }
-
-    .viz-header {
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
-    .viz-header h2 {
+    .section-header h2 {
       margin: 0;
-      font-size: 18px;
+      font-size: 19px;
     }
 
-    .viz-header span.sub {
+    .section-header span.sub {
       font-size: 12px;
       color: var(--text-muted);
     }
 
-    .controls {
-      margin-bottom: 10px;
+    .section-desc {
+      color: #e5e7eb;
+      margin: 6px 0 12px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--accent-gold);
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .pill-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 16px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .controls label {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    select {
-      background: var(--bg-card-alt);
-      color: var(--text-main);
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      padding: 3px 10px;
-      font-size: 13px;
-    }
-
-    svg {
-      width: 100%;
-      height: 430px;
-    }
-
-    .small-note {
+      gap: 6px;
+      margin-bottom: 8px;
       font-size: 12px;
       color: var(--text-muted);
-      margin-top: 6px;
     }
 
     .pill {
@@ -206,7 +131,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 1px 8px;
+      padding: 2px 8px;
       border-radius: 999px;
       border: 1px solid rgba(148,163,184,0.5);
       color: var(--text-muted);
@@ -220,7 +145,115 @@
       background: var(--accent-gold);
     }
 
-    /* Tooltip */
+    svg {
+      width: 100%;
+      height: 420px;
+    }
+
+    .small-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+      align-items: center;
+    }
+
+    .filters-row label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15,23,42,0.7);
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+    }
+
+    .filters-row select {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .filters-row select option {
+      color: #000;
+    }
+
+    .triple-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .scatter-card {
+      background: var(--bg-card-alt);
+      border-radius: 12px;
+      padding: 10px 10px 12px;
+      border: 1px solid rgba(31,41,55,0.9);
+    }
+
+    .scatter-card svg {
+      height: 260px;
+    }
+
+    .scatter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .mini-title-main {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .mini-title-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .scatter-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .scatter-controls select {
+      background: rgba(148, 178, 247, 0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      padding: 2px 6px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .scatter-controls select option {
+      color: #000;
+    }
+
+    .headline-number {
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    .headline-muted {
+      color: var(--text-muted);
+    }
+
     .tooltip {
       position: absolute;
       pointer-events: none;
@@ -234,25 +267,13 @@
       max-width: 260px;
       line-height: 1.4;
       box-shadow: 0 12px 30px rgba(15,23,42,0.95);
+      z-index: 50;
     }
 
-    /* Insights card */
-    .insights-list {
-      list-style: none;
-      padding-left: 0;
-      margin: 8px 0 0;
-      font-size: 13px;
-    }
-
-    .insights-list li {
-      margin-bottom: 6px;
-      color: var(--text-muted);
-    }
-
-    .insights-list li::before {
-      content: "•";
-      color: var(--accent-green);
-      margin-right: 6px;
+    @media (max-width: 1024px) {
+      .triple-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 768px) {
@@ -260,139 +281,142 @@
         padding-left: 16px;
         padding-right: 16px;
       }
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .triple-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>
-      Student Mental Health & Performance
+      Student Mental Health & Academic Performance
       <span class="badge">
         <span style="color: var(--accent-green);">●</span>
-        Online
+        D3 Analysis
       </span>
     </h1>
     <p>
-      Exploring how <span class="holiday">well-being</span> and <span class="holiday">academic success</span> interact for students, using two real-world datasets.
+      How does <span class="headline-muted">sleep, stress, and study habits</span> relate to
+      <span class="headline-number">GPA, exams, and assignments</span> across students?
     </p>
   </header>
 
   <main>
-    <!-- Top nav tabs -->
-    <div id="viz-nav">
-      <button id="btn-mental" class="active" data-target="viz-mental">
-        <span class="dot"></span>
-        Mental Health
-      </button>
-      <button id="btn-performance" data-target="viz-performance">
-        <span class="dot"></span>
-        Academic Performance
-      </button>
-      <button id="btn-insights" data-target="viz-insights">
-        <span class="dot"></span>
-        Overview & Insights
-      </button>
-    </div>
-
-    <!-- Mental Health Section -->
-    <section id="viz-mental" class="viz active">
-      <div class="viz-header">
-        <h2>Mental Health Snapshot</h2>
+    <!-- SECTION 1: Correlation Overview -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Overall relationships between well-being and performance</h2>
         <span class="sub">
-          Based on <span id="mh-count">–</span> students from the mental health survey
+          Correlations across <span id="student-count">–</span> students (student_academic_performance.csv)
         </span>
       </div>
-
-      <div class="controls">
-        <label>
-          Gender:
-          <select id="mh-gender-filter">
-            <option value="All">All</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </label>
-
-        <label>
-          Condition:
-          <select id="mh-condition-select">
-            <option value="depression">Depression</option>
-            <option value="anxiety">Anxiety</option>
-          </select>
-        </label>
-
-        <span class="pill">
-          <span class="dot"></span>
-          Uses mental_health_clean.csv
-        </span>
+      <p class="section-desc">
+        This grouped bar chart summarizes how strongly each key factor
+        (sleep hours, stress, and study hours) is related to performance outcomes (GPA, midterm,
+        final, assignments). Bars above zero indicate a positive relationship; bars below zero
+        indicate a negative relationship.
+      </p>
+      <div class="pill-row">
+        <div class="pill"><span class="dot"></span> Bars show Pearson correlation (–1 to +1)</div>
+        <div class="pill"><span class="dot"></span> Colors distinguish sleep, stress, and study</div>
       </div>
-
-      <!-- Placeholder SVG for a future chart (e.g., bar/line/heatmap) -->
-      <svg id="mh-svg"></svg>
-
+      <svg id="corr-bars"></svg>
       <div class="small-note">
-        Tip: You can use this space for a bar chart of condition rates by CGPA, major, or university.
+        Tip: Use the filters below to see how patterns change for different student groups.
       </div>
     </section>
 
-    <!-- Academic Performance Section -->
-    <section id="viz-performance" class="viz">
-      <div class="viz-header">
-        <h2>Academic Performance Snapshot</h2>
-        <span class="sub">
-          Based on <span id="sp-count">–</span> students from the performance dataset
-        </span>
+    <!-- SECTION 2: Interactive scatterplots (3 with filters) -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Zoom in on specific relationships</h2>
+        <span class="sub">Three scatterplots at a time, with filters to explore all combinations</span>
       </div>
-
-      <div class="controls">
-        <label>
-          Test Prep:
-          <select id="sp-prep-filter">
-            <option value="All">All</option>
-            <option value="yes">Completed</option>
-            <option value="no">No prep</option>
-          </select>
-        </label>
-
-        <label>
-          Score to focus:
-          <select id="sp-score-select">
-            <option value="math_score">Math</option>
-            <option value="reading_score">Reading</option>
-            <option value="writing_score">Writing</option>
-          </select>
-        </label>
-
-        <span class="pill">
-          <span class="dot"></span>
-          Uses student_performance_clean.csv
-        </span>
-      </div>
-
-      <!-- Placeholder SVG for a future chart (e.g., distribution or scatter) -->
-      <svg id="sp-svg"></svg>
-
-      <div class="small-note">
-        Tip: A histogram or boxplot per score, split by test prep, works really well here.
-      </div>
-    </section>
-
-    <!-- Insights / Overview Section -->
-    <section id="viz-insights" class="viz">
-      <div class="viz-header">
-        <h2>Project Overview & Planned Insights</h2>
-        <span class="sub">High-level story tying both datasets together</span>
-      </div>
-
-      <p class="small-note">
-        This section is for final presentation & report: briefly explain questions, data sources, and what each visualization reveals.
+      <p class="section-desc">
+        Use the global filters to focus on specific subsets of students, then customize each of the
+        three scatterplots to compare different well-being factors (sleep, stress, study, attendance,
+        social media) against academic outcomes (GPA, exams, assignments).
       </p>
 
-      <ul class="insights-list">
-        <li>Mental health dataset: self-reported depression/anxiety plus CGPA, university, academic workload, and lifestyle factors.</li>
-        <li>Performance dataset: standardized math, reading, writing scores with demographic and support context like test prep and lunch type.</li>
-        <li>Dashboard design: one tab focusing on mental health patterns, one on score distributions, and one on synthesizing takeaways.</li>
-      </ul>
+      <div class="filters-row">
+        <span style="font-size: 12px; color: var(--text-muted);">Filter students by:</span>
+
+        <label>
+          Gender
+          <select id="filter-gender">
+            <option value="all">All</option>
+            <option value="male">Male only</option>
+            <option value="female">Female only</option>
+          </select>
+        </label>
+
+        <label>
+          Attendance
+          <select id="filter-attendance">
+            <option value="all">All</option>
+            <option value="80plus">Attendance ≥ 80%</option>
+            <option value="90plus">Attendance ≥ 90%</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="triple-grid">
+        <!-- Chart 1 -->
+        <div class="scatter-card" data-chart="1">
+          <div class="scatter-header">
+            <div class="mini-title-main">Sleep hours vs GPA</div>
+            <div class="scatter-controls" data-chart="1">
+              <span>Factor:</span>
+              <select class="factor-select"></select>
+              <span>Outcome:</span>
+              <select class="outcome-select"></select>
+            </div>
+          </div>
+          <div class="mini-title-sub">
+             How does sleep, stress, study time, or other factors relate to GPA, exams, and assignments.
+          </div>
+          <svg id="scatter-1"></svg>
+        </div>
+
+        <!-- Chart 2 -->
+        <div class="scatter-card" data-chart="2">
+          <div class="scatter-header">
+            <div class="mini-title-main">Stress level vs GPA</div>
+            <div class="scatter-controls" data-chart="2">
+              <span>Factor:</span>
+              <select class="factor-select"></select>
+              <span>Outcome:</span>
+              <select class="outcome-select"></select>
+            </div>
+          </div>
+          <div class="mini-title-sub">
+            Try comparing stress with exam scores or assignment completion for the same subset of students.
+          </div>
+          <svg id="scatter-2"></svg>
+        </div>
+
+        <!-- Chart 3 -->
+        <div class="scatter-card" data-chart="3">
+          <div class="scatter-header">
+            <div class="mini-title-main">Study hours vs GPA</div>
+            <div class="scatter-controls" data-chart="3">
+              <span>Factor:</span>
+              <select class="factor-select"></select>
+              <span>Outcome:</span>
+              <select class="outcome-select"></select>
+            </div>
+          </div>
+          <div class="mini-title-sub">
+            Use this third view to test another factor–outcome pairing side-by-side.
+          </div>
+          <svg id="scatter-3"></svg>
+        </div>
+      </div>
     </section>
   </main>
 
